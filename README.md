@@ -388,3 +388,10 @@ This is a prototype for demonstration and further engineering. It is not a certi
 **Project:** RESQ-LINK AI  
 **System:** Rescue Command Center  
 **Communication:** ESP32 + LoRa
+
+
+
+
+## Live Website
+
+🌐 [Open Website](https://resqlinkai.netlify.app/)
