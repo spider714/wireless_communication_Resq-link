@@ -1,0 +1,523 @@
+<!DOCTYPE html>
+<html lang="en" id="htmlRoot">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1.0">
+  <title>RESQ LINK — Emergency Response System</title>
+  <link rel="stylesheet" href="style.css">
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
+</head>
+
+<body>
+
+  <!-- Reusable inline icon defs -->
+  <svg width="0" height="0" style="position:absolute">
+    <defs>
+      <symbol id="i-shield" viewBox="0 0 24 24">
+        <path d="M12 2l8 3v6c0 5-3.4 9-8 11-4.6-2-8-6-8-11V5l8-3z" fill="none" stroke="currentColor" stroke-width="1.7"
+          stroke-linejoin="round" />
+      </symbol>
+      <symbol id="i-grid" viewBox="0 0 24 24">
+        <rect x="3" y="3" width="7" height="7" rx="1" fill="none" stroke="currentColor" stroke-width="1.7" />
+        <rect x="14" y="3" width="7" height="7" rx="1" fill="none" stroke="currentColor" stroke-width="1.7" />
+        <rect x="3" y="14" width="7" height="7" rx="1" fill="none" stroke="currentColor" stroke-width="1.7" />
+        <rect x="14" y="14" width="7" height="7" rx="1" fill="none" stroke="currentColor" stroke-width="1.7" />
+      </symbol>
+      <symbol id="i-alert" viewBox="0 0 24 24">
+        <path d="M12 4l9 16H3L12 4z" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round" />
+        <line x1="12" y1="10" x2="12" y2="14.5" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" />
+        <circle cx="12" cy="17.3" r="0.9" fill="currentColor" />
+      </symbol>
+      <symbol id="i-radio" viewBox="0 0 24 24">
+        <circle cx="12" cy="12" r="3" fill="none" stroke="currentColor" stroke-width="1.7" />
+        <path d="M7 9a7 7 0 000 6M17 9a7 7 0 010 6M4 6a11 11 0 000 12M20 6a11 11 0 010 12" fill="none"
+          stroke="currentColor" stroke-width="1.5" stroke-linecap="round" />
+      </symbol>
+      <symbol id="i-clock" viewBox="0 0 24 24">
+        <circle cx="12" cy="12" r="9" fill="none" stroke="currentColor" stroke-width="1.7" />
+        <path d="M12 7v5l3.5 2" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" />
+      </symbol>
+      <symbol id="i-info" viewBox="0 0 24 24">
+        <circle cx="12" cy="12" r="9" fill="none" stroke="currentColor" stroke-width="1.7" />
+        <line x1="12" y1="11" x2="12" y2="16.5" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" />
+        <circle cx="12" cy="7.7" r="0.9" fill="currentColor" />
+      </symbol>
+      <symbol id="i-pin" viewBox="0 0 24 24">
+        <path d="M12 21s7-6.4 7-12a7 7 0 10-14 0c0 5.6 7 12 7 12z" fill="none" stroke="currentColor" stroke-width="1.7"
+          stroke-linejoin="round" />
+        <circle cx="12" cy="9" r="2.4" fill="none" stroke="currentColor" stroke-width="1.6" />
+      </symbol>
+      <symbol id="i-refresh" viewBox="0 0 24 24">
+        <path d="M4 12a8 8 0 0114-5.3M20 12a8 8 0 01-14 5.3" fill="none" stroke="currentColor" stroke-width="1.7"
+          stroke-linecap="round" />
+        <path d="M18 4v4h-4M6 20v-4h4" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"
+          stroke-linejoin="round" />
+      </symbol>
+      <symbol id="i-close" viewBox="0 0 24 24">
+        <line x1="5" y1="5" x2="19" y2="19" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" />
+        <line x1="19" y1="5" x2="5" y2="19" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" />
+      </symbol>
+      <symbol id="i-nav" viewBox="0 0 24 24">
+        <path d="M3 11l17-8-8 17-2-7-7-2z" fill="none" stroke="currentColor" stroke-width="1.6"
+          stroke-linejoin="round" />
+      </symbol>
+      <symbol id="i-trash" viewBox="0 0 24 24">
+        <path d="M4 7h16M9 7V4h6v3M6 7l1 13h10l1-13" fill="none" stroke="currentColor" stroke-width="1.6"
+          stroke-linejoin="round" />
+      </symbol>
+      <symbol id="i-plus" viewBox="0 0 24 24">
+        <line x1="12" y1="5" x2="12" y2="19" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" />
+        <line x1="5" y1="12" x2="19" y2="12" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" />
+      </symbol>
+      <symbol id="i-target" viewBox="0 0 24 24">
+        <circle cx="12" cy="12" r="8" fill="none" stroke="currentColor" stroke-width="1.6" />
+        <circle cx="12" cy="12" r="3" fill="none" stroke="currentColor" stroke-width="1.6" />
+        <line x1="12" y1="2" x2="12" y2="5" stroke="currentColor" stroke-width="1.6" />
+        <line x1="12" y1="19" x2="12" y2="22" stroke="currentColor" stroke-width="1.6" />
+        <line x1="2" y1="12" x2="5" y2="12" stroke="currentColor" stroke-width="1.6" />
+        <line x1="19" y1="12" x2="22" y2="12" stroke="currentColor" stroke-width="1.6" />
+      </symbol>
+      <symbol id="i-truck" viewBox="0 0 24 24">
+        <path d="M2 7h11v10H2zM13 10h5l4 4v3h-9z" fill="none" stroke="currentColor" stroke-width="1.6"
+          stroke-linejoin="round" />
+        <circle cx="6.5" cy="18.5" r="1.6" fill="none" stroke="currentColor" stroke-width="1.4" />
+        <circle cx="17" cy="18.5" r="1.6" fill="none" stroke="currentColor" stroke-width="1.4" />
+      </symbol>
+      <symbol id="i-globe" viewBox="0 0 24 24">
+        <circle cx="12" cy="12" r="9" fill="none" stroke="currentColor" stroke-width="1.6" />
+        <ellipse cx="12" cy="12" rx="4" ry="9" fill="none" stroke="currentColor" stroke-width="1.4" />
+        <line x1="3" y1="12" x2="21" y2="12" stroke="currentColor" stroke-width="1.4" />
+      </symbol>
+    </defs>
+  </svg>
+
+  <div class="app">
+    <aside class="sidebar">
+      <div class="brand">
+        <div class="brand-mark"><span class="icon" style="width:18px;height:18px"><svg>
+              <use href="#i-shield" />
+            </svg></span></div>
+        <div class="brand-text">
+          <strong>RESQ LINK</strong>
+          <span data-i18n="brandTagline">Emergency Response System</span>
+        </div>
+      </div>
+
+      <nav class="nav">
+        <button class="nav-btn active" data-page="overview">
+          <span class="icon"><svg>
+              <use href="#i-grid" />
+            </svg></span> <span data-i18n="navOverview">Overview</span>
+        </button>
+        <button class="nav-btn" data-page="alerts">
+          <span class="icon"><svg>
+              <use href="#i-alert" />
+            </svg></span> <span data-i18n="navAlerts">Alerts</span>
+          <span id="navAlertBadge" class="nav-badge">0</span>
+        </button>
+        <button class="nav-btn" data-page="devices">
+          <span class="icon"><svg>
+              <use href="#i-radio" />
+            </svg></span> <span data-i18n="navDevices">Devices</span>
+        </button>
+        <button class="nav-btn" data-page="broadcast">
+          <span class="icon"><svg>
+              <use href="#i-radio" />
+            </svg></span> <span data-i18n="navBroadcast">Send Message</span>
+        </button>
+        <button class="nav-btn" data-page="history">
+          <span class="icon"><svg>
+              <use href="#i-clock" />
+            </svg></span> <span data-i18n="navHistory">Activity Log</span>
+        </button>
+        <button class="nav-btn" data-page="about">
+          <span class="icon"><svg>
+              <use href="#i-info" />
+            </svg></span> <span data-i18n="navAbout">How It Works</span>
+        </button>
+      </nav>
+
+      <div class="serial-box">
+        <div class="serial-status">
+          <span id="serialDot" class="dot offline"></span>
+          <span id="serialText" data-i18n="receiverOffline">Receiver Offline</span>
+        </div>
+        <button id="connectBtn" class="connect-btn" data-i18n="connectReceiver">Connect Receiver</button>
+        <small data-i18n="connectHint">WEB SERIAL · 115200 BAUD</small>
+      </div>
+    </aside>
+
+    <main class="main">
+      <header class="topbar">
+        <div>
+          <h1 id="pageTitle">Overview</h1>
+          <p id="topbarSubtitle" data-i18n="topbarSubtitle">Live alerts and quick response coordination for your area.
+          </p>
+        </div>
+        <div class="topbar-meta">
+          <button id="langToggleBtn" class="btn btn-outline btn-sm" title="Change language">
+            <span class="icon" style="width:14px;height:14px"><svg>
+                <use href="#i-globe" />
+              </svg></span> <span id="langToggleLabel">हिंदी</span>
+          </button>
+          <button id="demoBtnTop" class="btn btn-dark btn-sm" data-i18n="demoBtn"
+            title="Add sample alerts to try the system">
+            Run demo
+          </button>
+          <button id="resetAllBtn" class="btn btn-outline btn-sm" data-i18n="clearDataBtn"
+            title="Clear all stored alerts and history">
+            Clear data
+          </button>
+          <div class="station-pill">
+            <span id="stationDot" class="dot offline"></span>
+            <span id="stationStatusText" data-i18n="radioStandby">Radio standby</span>
+          </div>
+          <div id="clock" class="clock">--:--:--</div>
+        </div>
+      </header>
+
+      <!-- OVERVIEW -->
+      <section id="overview" class="page active">
+        <div class="stats">
+          <div class="stat">
+            <div class="stat-header"><span data-i18n="statActiveLabel">Active Alerts</span>
+              <div class="stat-icon tone-critical"><span class="icon"><svg>
+                    <use href="#i-alert" />
+                  </svg></span></div>
+            </div>
+            <b id="activeAlerts">0</b>
+            <small data-i18n="statActiveSub">Not yet closed</small>
+          </div>
+          <div class="stat">
+            <div class="stat-header"><span data-i18n="statDevicesLabel">Registered Devices</span>
+              <div class="stat-icon tone-active"><span class="icon"><svg>
+                    <use href="#i-radio" />
+                  </svg></span></div>
+            </div>
+            <b id="deviceCount">0</b>
+            <small data-i18n="statDevicesSub">Field units on record</small>
+          </div>
+          <div class="stat">
+            <div class="stat-header"><span data-i18n="statTodayLabel">Alerts Today</span>
+              <div class="stat-icon tone-pending"><span class="icon"><svg>
+                    <use href="#i-clock" />
+                  </svg></span></div>
+            </div>
+            <b id="todayAlerts">0</b>
+            <small data-i18n="statTodaySub">Past 24 hours</small>
+          </div>
+          <div class="stat">
+            <div class="stat-header"><span data-i18n="statSignalLabel">Last Signal</span>
+              <div class="stat-icon tone-resolved"><span class="icon"><svg>
+                    <use href="#i-refresh" />
+                  </svg></span></div>
+            </div>
+            <b id="lastSignal">--</b>
+            <small data-i18n="statSignalSub">Most recent update</small>
+          </div>
+        </div>
+
+        <div class="grid-two">
+          <div class="card">
+            <div class="card-head">
+              <div class="card-head-title">
+                <h2 data-i18n="mapTitle">Live Map</h2>
+                <span class="live-pill"><span class="live-dot"></span> <span data-i18n="liveTag">Live</span></span>
+              </div>
+              <div class="card-head-actions">
+                <button id="demoBtnMap" class="sm-btn tone-dark" data-i18n="demoSm">Demo</button>
+                <button id="recenterMapBtn" class="sm-btn" data-i18n="centerBtn">Center map</button>
+              </div>
+            </div>
+            <div class="map-shell">
+              <div id="map"></div>
+              <div class="map-legend" id="mapLegend"></div>
+            </div>
+          </div>
+
+          <div class="card">
+            <div class="card-head">
+              <div class="card-head-title">
+                <h2 data-i18n="alertsCardTitle">Alerts</h2>
+              </div>
+              <div class="card-head-actions">
+                <span id="alertCountBadge" class="sm-btn"
+                  style="border-radius:999px;font-weight:700;background:var(--critical-soft);color:var(--critical);border-color:var(--critical-line)">0</span>
+              </div>
+            </div>
+            <div id="latestAlerts" class="list"></div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ALERTS -->
+      <section id="alerts" class="page">
+        <div class="page-head">
+          <div>
+            <h2 data-i18n="alertsPageTitle">All Alerts</h2>
+            <p data-i18n="alertsPageDesc">See every alert, its status and where it is coming from.</p>
+          </div>
+          <button id="clearAlerts" class="btn btn-outline btn-sm" data-i18n="clearAlertsBtn">Clear alerts</button>
+        </div>
+        <div id="alertsList" class="alert-list"></div>
+      </section>
+
+      <!-- DEVICES -->
+      <section id="devices" class="page">
+        <div class="page-head">
+          <div>
+            <h2 data-i18n="devicesPageTitle">Devices</h2>
+            <p data-i18n="devicesPageDesc">Add and manage the field devices sending you alerts.</p>
+          </div>
+          <button id="registerDeviceBtn" class="btn btn-primary btn-sm">
+            <span class="icon" style="width:14px;height:14px"><svg>
+                <use href="#i-plus" />
+              </svg></span> <span data-i18n="addDeviceBtn">Add device</span>
+          </button>
+        </div>
+        <div id="devicesList" class="device-list"></div>
+      </section>
+
+      <!-- BROADCAST -->
+      <section id="broadcast" class="page">
+        <div class="broadcast-wrap">
+          <div class="card">
+            <div class="card-head">
+              <h2 data-i18n="broadcastTitle">Send Message</h2>
+            </div>
+            <p style="margin:8px 0 0;color:var(--text-3);font-size:12.5px" data-i18n="broadcastDesc">Send a message to
+              every connected field device.</p>
+
+            <div class="quick-msg-row">
+              <button class="sm-btn quick-msg" data-msg="STANDBY FOR INSTRUCTIONS" data-i18n="qStandby">Standby</button>
+              <button class="sm-btn quick-msg" data-msg="RESCUE TEAM EN ROUTE TO YOUR GPS" data-i18n="qEnRoute">Team is
+                on the way</button>
+              <button class="sm-btn quick-msg" data-msg="SEEK HIGH GROUND IMMEDIATELY" data-i18n="qHighGround">Move to
+                high ground</button>
+              <button class="sm-btn quick-msg" data-msg="ALL CLEAR - OPERATION NORMAL" data-i18n="qAllClear">All
+                clear</button>
+            </div>
+
+            <textarea id="broadcastMessage" maxlength="160" data-i18n-ph="broadcastPlaceholder"
+              placeholder="Type your message here (max 160 characters)"></textarea>
+            <div style="display:flex;justify-content:space-between;align-items:center;margin-top:6px">
+              <small id="charCount" style="color:var(--text-3);font-family:var(--font-mono)">0 / 160</small>
+            </div>
+            <button id="broadcastBtn" class="btn btn-primary btn-wide" data-i18n="sendBroadcastBtn">Send to all
+              devices</button>
+          </div>
+
+          <div class="high-alert-card">
+            <div class="high-alert-title" data-i18n="sirenTitle">Emergency Siren Alert</div>
+            <p data-i18n="sirenDesc">Turns on a loud alarm sound on every connected device.</p>
+            <input id="highAlertMessage" maxlength="120" value="EVACUATE NOW - HIGH ALERT">
+            <button id="highAlertBtn" class="btn btn-critical btn-wide" data-i18n="sirenOnBtn">Turn on siren</button>
+            <button id="stopAlertBtn" class="btn btn-dark btn-wide" data-i18n="sirenOffBtn">Turn off siren</button>
+          </div>
+
+          <div class="card">
+            <div class="card-head">
+              <h2 data-i18n="testTitle">Test Connection</h2>
+            </div>
+            <p style="margin:8px 0 0;color:var(--text-3);font-size:12.5px" data-i18n="testDesc">Check whether devices
+              can receive your messages.</p>
+            <button id="testBtn" class="btn btn-outline btn-wide" data-i18n="testBtn">Send test message</button>
+          </div>
+        </div>
+      </section>
+
+      <!-- HISTORY -->
+      <section id="history" class="page">
+        <div class="page-head">
+          <div>
+            <h2 data-i18n="historyTitle">Activity Log</h2>
+            <p data-i18n="historyDesc">A record of past alerts, messages and status changes.</p>
+          </div>
+          <button id="clearHistoryBtn" class="btn btn-outline btn-sm" data-i18n="clearLogBtn">Clear log</button>
+        </div>
+        <div id="historyList" class="history-list"></div>
+      </section>
+
+      <!-- ABOUT -->
+      <section id="about" class="page">
+        <div class="about-container">
+          <div class="about-card">
+            <h3><span class="icon"><svg>
+                  <use href="#i-info" />
+                </svg></span> How this system works</h3>
+            <p>RESQ LINK is an emergency response system. It works even without mobile network or internet, by using
+              long-range radio to send alerts from remote areas to a control point.</p>
+            <div class="diagram-box">
+              <div class="diagram-step"><span class="step-num">1</span><span><b>Alert sent</b> — a device sends a
+                  distress signal over long-range radio (LoRa).</span></div>
+              <div class="diagram-step"><span class="step-num">2</span><span><b>Signal received</b> — the receiver picks
+                  up the signal and sends it to this dashboard.</span></div>
+              <div class="diagram-step"><span class="step-num">3</span><span><b>Alert sorted</b> — the system checks the
+                  alert type and finds distance and time to reach.</span></div>
+              <div class="diagram-step"><span class="step-num">4</span><span><b>Help notified</b> — the alert details
+                  can be sent to police, ambulance, fire or rescue teams.</span></div>
+            </div>
+          </div>
+
+          <div class="about-card">
+            <h3><span class="icon"><svg>
+                  <use href="#i-pin" />
+                </svg></span> Where devices can be placed</h3>
+            <p>Devices can be placed in remote areas without needing mobile towers, wires or main power.</p>
+            <div class="specs-grid">
+              <div class="spec-card"><b>Forests &amp; trails</b><span>Fixed on a pole with a simple SOS button.</span>
+              </div>
+              <div class="spec-card"><b>Riverbanks &amp; flood areas</b><span>Fitted with a water-level sensor that
+                  sends an alert on its own.</span></div>
+              <div class="spec-card"><b>Villages &amp; schools</b><span>Set up as a public help-point for medical, fire
+                  or police emergencies.</span></div>
+            </div>
+            <div
+              style="margin-top:14px;background:var(--surface-alt);padding:13px 16px;border-radius:9px;font-size:12.5px;line-height:1.6;color:var(--text-2)">
+              <b style="color:var(--text-1)">Device details</b>
+              <ul style="margin:6px 0 0 18px;padding:0">
+                <li>Weatherproof box, safe for rain and sun.</li>
+                <li>Runs on solar power with battery backup, works for weeks without sunlight.</li>
+                <li>Long-range antenna for better signal reach.</li>
+                <li>Built with ESP32 and LoRa radio module, plus GPS for location.</li>
+              </ul>
+            </div>
+          </div>
+
+          <div class="about-card">
+            <h3><span class="icon"><svg>
+                  <use href="#i-truck" />
+                </svg></span> How responders use it</h3>
+            <div class="specs-grid">
+              <div class="spec-card"><b>Fire Brigade</b><span>Gets the exact location and type of fire danger.</span>
+              </div>
+              <div class="spec-card"><b>Ambulance</b><span>Gets patient details, distance and route to reach
+                  fast.</span></div>
+              <div class="spec-card"><b>Police</b><span>Gets alerts for safety threats and SOS signals.</span></div>
+            </div>
+          </div>
+
+          <div class="about-card">
+            <h3><span class="icon"><svg>
+                  <use href="#i-radio" />
+                </svg></span> Technical details</h3>
+            <div class="specs-grid">
+              <div class="spec-card"><b>Radio frequency</b><span>Uses free, license-free radio bands (433/868/915
+                  MHz).</span></div>
+              <div class="spec-card"><b>Range</b><span>3–5 km in forests or hills, 10–15+ km in open areas.</span></div>
+              <div class="spec-card"><b>No network needed</b><span>Works without SIM card, mobile data or Wi-Fi.</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <!-- INCIDENT DETAIL DRAWER -->
+  <div id="drawerOverlay" class="drawer-overlay"></div>
+  <aside id="incidentDrawer" class="drawer">
+    <div class="drawer-head">
+      <div>
+        <div class="drawer-head-id" id="drawerIncidentId">ALERT ID</div>
+        <div class="drawer-head-title" id="drawerIncidentTitle">Alert type — Device</div>
+      </div>
+      <button id="drawerClose" class="drawer-close"><span class="icon"><svg>
+            <use href="#i-close" />
+          </svg></span></button>
+    </div>
+    <div class="drawer-body">
+
+      <div class="drawer-section">
+        <div class="drawer-section-label" data-i18n="drawerStatusLabel">Status</div>
+        <div class="status-track" id="drawerStatusTrack"></div>
+      </div>
+
+      <div class="drawer-section">
+        <div class="drawer-section-label" data-i18n="drawerLiveLocation">Live Location</div>
+        <div class="drawer-map" id="drawerMap"></div>
+      </div>
+
+      <div class="drawer-section">
+        <div class="drawer-section-label" data-i18n="drawerInfoLabel">Details</div>
+        <div class="tele-grid">
+          <div class="tele-item"><span data-i18n="teleDistance">Distance</span><b id="drawerDistance">--</b></div>
+          <div class="tele-item"><span data-i18n="teleEta">Time to reach</span><b id="drawerEta">--</b></div>
+          <div class="tele-item"><span data-i18n="teleSignal">Signal</span><b id="drawerSignal">--</b></div>
+          <div class="tele-item"><span data-i18n="teleBattery">Battery</span><b id="drawerBattery">--</b></div>
+          <div class="tele-item"><span data-i18n="teleReported">Reported at</span><b id="drawerReported">--</b></div>
+          <div class="tele-item"><span data-i18n="telePings">Signals received</span><b id="drawerPings">--</b></div>
+        </div>
+      </div>
+
+      <div class="drawer-section">
+        <div class="drawer-section-label" data-i18n="drawerDeviceInfoLabel">Device Info</div>
+        <div class="tele-grid">
+          <div class="tele-item"><span data-i18n="teleDeviceId">Device ID</span><b id="drawerDeviceId">--</b></div>
+          <div class="tele-item"><span data-i18n="teleLocationName">owner name</span><b id="drawerOwner"
+              style="font-size:12.5px">--</b></div>
+          <div class="tele-item" style="grid-column:1/-1"><span data-i18n="teleGps">GPS coordinates</span><b
+              id="drawerGps" style="font-size:12.5px">--</b></div>
+        </div>
+      </div>
+
+      <div class="drawer-section">
+        <div class="drawer-section-label" data-i18n="drawerAssignedLabel">Assigned To</div>
+        <div class="directive-box">
+          <div id="drawerAgency" style="font-weight:700;margin-bottom:6px">--</div>
+          <div id="drawerDirectives">--</div>
+        </div>
+      </div>
+
+      <div class="drawer-section">
+        <div class="drawer-section-label" data-i18n="drawerActionsLabel">Actions</div>
+        <div class="action-grid">
+          <a id="drawerNavBtn" href="#" target="_blank" class="btn btn-dark span-2" style="text-decoration:none">
+            <span class="icon" style="width:14px;height:14px"><svg>
+                <use href="#i-nav" />
+              </svg></span> <span data-i18n="btnDirections">Get directions</span>
+          </a>
+          <button id="drawerEnRoute" class="btn btn-outline" data-i18n="btnEnRoute">On the way</button>
+          <button id="drawerOnScene" class="btn btn-outline" data-i18n="btnOnScene">Reached</button>
+          <button id="drawerComplete" class="btn btn-critical span-2" data-i18n="btnMarkClosed">Mark as closed</button>
+        </div>
+      </div>
+
+      <div class="drawer-section">
+        <div class="drawer-section-label" data-i18n="drawerSendLabel">Send Alert To</div>
+        <div class="action-grid" id="drawerAuthorityGrid"></div>
+      </div>
+
+      <div class="drawer-section">
+        <div class="drawer-section-label" data-i18n="drawerTimelineLabel">Timeline</div>
+        <div class="timeline-mini" id="drawerTimeline"></div>
+      </div>
+
+    </div>
+  </aside>
+
+  <!-- MODAL: ADD DEVICE -->
+  <div id="modal" class="modal hidden">
+    <div class="modal-box">
+      <h2 data-i18n="addDeviceModalTitle">Add new device</h2>
+      <p style="color:var(--text-3);font-size:12.5px;margin-top:4px" data-i18n="addDeviceModalDesc">Give this device a
+        name so you can find it later.</p>
+      <span class="field-label" data-i18n="fieldDeviceId">Device ID</span>
+      <input id="newDeviceId" placeholder="e.g. DEV002">
+      <span class="field-label" data-i18n="fieldOwnerName">Owner / location name</span>
+      <input id="newOwnerId" placeholder="e.g. Rescue Team Bravo">
+      <div class="modal-actions">
+        <button id="cancelModal" class="btn btn-outline" data-i18n="cancelBtn">Cancel</button>
+        <button id="saveDevice" class="btn btn-primary" data-i18n="addDeviceBtn">Add device</button>
+      </div>
+    </div>
+  </div>
+
+  <div id="toast" class="toast"></div>
+
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+  <script src="app.js"></script>
+</body>
+
+</html>
