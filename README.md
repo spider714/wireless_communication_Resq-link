@@ -13,6 +13,17 @@ Web Dashboard → USB Serial → Receiver ESP32 → LoRa → Field ESP32 devices
 
 The LoRa communication does not depend on cellular internet connectivity.
 
+## 🚨 Prototype
+
+<p align="center">
+  <img src=".\victime_device.png" alt="RESQ-LINK AI Rescue Command Center Prototype" width="100%">
+</p>
+
+<p align="center">
+  <img src=".\reveiver.png" alt="RESQ-LINK AI Rescue Command Center Prototype" width="100%">
+</p>
+
+
 ## Features
 
 - Emergency alert monitoring
