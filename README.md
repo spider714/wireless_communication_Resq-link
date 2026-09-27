@@ -19,7 +19,7 @@ The LoRa communication does not depend on cellular internet connectivity.
   <img src=".\victime_device.png" alt="RESQ-LINK AI Rescue Command Center Prototype" width="100%">
 </p>
 
-<h1>Resque Station Reveiver Device</h1>
+<h1>Resque Station Receiver Device</h1>
 <p align="center">
   <img src=".\reveiver.png" alt="RESQ-LINK AI Rescue Command Center Prototype" width="100%">
 </p>
